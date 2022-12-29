@@ -6,7 +6,7 @@ const firebaseConfig = require('../utils/firebase');
 
 const UsuarioModel = require('../models/usuario.model');
 
-const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth');
+const { sendPasswordResetEmail, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth');
 
 const { initializeApp } = require('firebase/app');
 const app = initializeApp(firebaseConfig);
@@ -55,6 +55,36 @@ exports.autenticar = async (req, res) => {
             res.status(500).json({
                 errorCode,
                 errorMessage
+            })
+        });
+}
+
+exports.reenviarSenha = async (req, res) => {
+    const email = req.body.email
+    const auth = getAuth();
+    var actionCodeSettings = {
+        url: 'https://thiagolamberti.com.br',
+        // iOS: {
+        //     bundleId: 'com.example.ios'
+        // },
+        // android: {
+        //     packageName: 'com.example.android',
+        //     installApp: true,
+        //     minimumVersion: '12'
+        // },
+        // handleCodeInApp: true
+    };
+
+    sendPasswordResetEmail(
+        auth, email, actionCodeSettings)
+        .then(function () {
+            // Password reset email sent.
+            res.status(200).json({ result: true, 'Mensagem: ': 'Solicitação de alteração enviada por e-mail.' })
+        })
+        .catch(function (error) {
+            // Error occurred. Inspect error.code.
+            res.status(500).json({
+                error: error
             })
         });
 }

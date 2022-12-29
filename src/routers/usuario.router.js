@@ -10,4 +10,7 @@ router.post('/', controller.cadastrarUsuario)
 // Autenticar
 router.post('/autenticar', controller.autenticar)
 
+// Reenviar senha por e-mail (esqueci minha senha)
+router.post('/reenviar-senha', controller.reenviarSenha)
+
 module.exports = router;
