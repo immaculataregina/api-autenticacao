@@ -64,7 +64,7 @@ jobs:
           command: echo $DEVELOP_GCLOUD_ACCOUNT_KEY >> account-key.json
       - run:
           name: GCloud Auth
-          command: gcloud auth activate-service-account "circleci@https://api-autenticacao-develop.iam.gserviceaccount.com" --key-file=account-key.json
+          command: gcloud auth activate-service-account "circleci@api-auth-develop-373121.iam.gserviceaccount.com" --key-file=account-key.json
       - run:
           name: GCloud Deploy
           command: gcloud app deploy deploy-app.yaml --project=api-autenticacao-develop --quiet
