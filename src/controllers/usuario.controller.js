@@ -14,15 +14,17 @@ const app = initializeApp(firebaseConfig);
 
 exports.cadastrarUsuario = async (req, res) => {
 
+    const schema = req.headers.schema
     const email = req.body.email
     const senha = req.body.senha
-    const idsFuncionalidades = req.body.idsFuncionalidades
+    const idPessoa = req.body.idPessoa
+    // const idsFuncionalidades = req.body.idsFuncionalidades
     const auth = getAuth(app);
     createUserWithEmailAndPassword(auth, email, senha)
         .then((userCredential) => {
             // Signed in 
             const user = userCredential.user;
-            // ...
+
             res.status(200).json({ result: true, user })
         })
         .catch((error) => {
@@ -37,16 +39,19 @@ exports.cadastrarUsuario = async (req, res) => {
 }
 
 exports.autenticar = async (req, res) => {
+    const schema = req.headers.schema
+    
     const email = req.body.email
     const senha = req.body.senha
 
     const auth = getAuth();
     signInWithEmailAndPassword(auth, email, senha)
-        .then((userCredential) => {
+        .then(async (userCredential)  => {
             // Signed in 
             const user = userCredential.user;
-            // ...
-            res.status(200).json({ result: true, user })
+            // Dados de retorno do usuário logado
+            const configuracoes = await UsuarioModel.buscarDadosLogin(schema, user.uid)
+            res.status(200).json({ result: true, auth: user, configuracoes })
         })
         .catch((error) => {
             const errorCode = error.code;
