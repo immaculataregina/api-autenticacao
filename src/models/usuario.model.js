@@ -40,7 +40,7 @@ exports.buscarDadosLogin = async (schema, uid) => {
 			WITH temp_pessoa AS (
 				SELECT id_pessoa,
 				apelido,
-				url_foto
+				foto
 				FROM ${schema}.pessoas
 				WHERE uid = '${uid}'
 			)
@@ -50,10 +50,9 @@ exports.buscarDadosLogin = async (schema, uid) => {
 			p.hx_cor_primaria,
 			p.hx_cor_secundaria,
 			p.hx_cor_texto,
-			p.url_logo_paroquia,
 			(SELECT apelido FROM temp_pessoa) AS apelido,
 			(SELECT ARRAY_AGG(titulo_menu) FROM itens_menu) AS itens_menu,
-			(SELECT url_foto FROM temp_pessoa) AS url_foto
+			(SELECT foto FROM temp_pessoa) AS foto
 			FROM paroquias p
 			WHERE p.schema = '${schema}'
 			`;
