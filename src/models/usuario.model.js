@@ -57,7 +57,7 @@ exports.buscarDadosLogin = async (schema, uid) => {
 			(SELECT apelido FROM temp_pessoa) AS apelido,
 			(SELECT ARRAY_AGG(titulo_menu) FROM itens_menu) AS itens_menu,
 			(SELECT foto FROM temp_pessoa) AS foto,
-			(SELECT dizimista FROM temp_pessoa) AS dizimista
+			(SELECT coalesce(dizimista, FALSE) FROM temp_pessoa) AS dizimista
 			FROM paroquias p
 			WHERE p.schema = '${schema}'
 			`;
