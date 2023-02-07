@@ -38,11 +38,15 @@ exports.buscarDadosLogin = async (schema, uid) => {
 		const query =
 			`
 			WITH temp_pessoa AS (
-				SELECT id_pessoa,
-				apelido,
-				foto
-				FROM ${schema}.pessoas
-				WHERE uid = '${uid}'
+				SELECT p.id_pessoa,
+				p.apelido,
+				p.foto,
+				d.ativo AS dizimista
+				FROM ${schema}.pessoas p
+				LEFT JOIN ${schema}.dizimistas d
+					ON d.id_pessoa = p.id_pessoa
+						AND d.ativo = TRUE
+				WHERE p.uid = '${uid}'
 			)
 			
 			SELECT
@@ -52,7 +56,8 @@ exports.buscarDadosLogin = async (schema, uid) => {
 			p.hx_cor_texto,
 			(SELECT apelido FROM temp_pessoa) AS apelido,
 			(SELECT ARRAY_AGG(titulo_menu) FROM itens_menu) AS itens_menu,
-			(SELECT foto FROM temp_pessoa) AS foto
+			(SELECT foto FROM temp_pessoa) AS foto,
+			(SELECT dizimista FROM temp_pessoa) AS dizimista
 			FROM paroquias p
 			WHERE p.schema = '${schema}'
 			`;
