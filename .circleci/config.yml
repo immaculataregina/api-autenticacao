@@ -1,0 +1,73 @@
+version: 2.1
+
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      # deploy
+      - develop:
+          filters:
+            branches:
+              only: develop
+
+
+jobs:
+  develop:
+    docker:
+      - image: google/cloud-sdk:latest
+    environment:
+      CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
+    working_directory: ~/api-autenticacao
+    steps:
+      - checkout
+      - run:
+          name: Export Git CommitMessage
+          command: |
+            echo 'export GIT_COMMIT_MESSAGE=$(git log --pretty=oneline --abbrev-commit -n 1)' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Export Git Author
+          command: |
+            echo 'export GIT_COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Export ENV
+          command: |
+            echo 'export NODE_ENV=DEVELOP' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: Install keys in OS
+          command: |
+            apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FEEA9169307EA071
+            apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B57C5C2836F4BEB
+            apt-get --allow-releaseinfo-change update
+      - run:
+          name: Install NodeJS & Gettext
+          command: curl -sL https://deb.nodesource.com/setup_18.x | bash -
+      - run: apt-get install -y nodejs
+      - run: apt-get install -y gettext
+      - run:
+          name: Export Package Version
+          command: export VERSION=$(node -p "require('./package.json').version")
+      - run:
+          name: Install Dependencies
+          command: npm install
+      # - run:
+      #     name: Build Typescript files to Node
+      #     command: npm run-script build
+      - run:
+          name: Generate app.yaml
+          command: DB_CONNECTION_STRING=$DEVELOP_DB_CONNECTION_STRING API_KEY=$DEVELOP_API_KEY AUTH_DOMAIN=$DEVELOP_AUTH_DOMAIN PROJECT_ID=$DEVELOP_PROJECT_ID STORAGE_BUCKET=$DEVELOP_STORAGE_BUCKET MESSAGING_SENDER_ID=$DEVELOP_MESSAGING_SENDER_ID APP_ID=$DEVELOP_APP_ID MEASUREMENT_ID=$DEVELOP_MEASUREMENT_ID envsubst < app.yaml >> deploy-app.yaml
+      - run: cat deploy-app.yaml
+      - run:
+          name: GCloud Generate Account Key File
+          command: echo $DEVELOP_GCLOUD_ACCOUNT_KEY >> account-key.json
+      - run:
+          name: GCloud Auth
+          command: gcloud auth activate-service-account "circleci@api-auth-develop-373121.iam.gserviceaccount.com" --key-file=account-key.json
+      - run:
+          name: GCloud Deploy
+          command: gcloud app deploy app.yaml --project=api-autenticacao-develop --quiet
+      # - run:
+      #     name: GCloud Cron Deploy
+      #     command: gcloud app deploy cron.yaml --project=api-autenticacao-develop --quiet
