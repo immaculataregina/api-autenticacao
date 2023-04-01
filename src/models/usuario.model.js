@@ -55,7 +55,9 @@ exports.buscarDadosLogin = async (schema, uid) => {
 			p.hx_cor_secundaria,
 			p.hx_cor_texto,
 			(SELECT apelido FROM temp_pessoa) AS apelido,
-			(SELECT ARRAY_AGG(titulo_menu) FROM itens_menu) AS itens_menu,
+			(SELECT ARRAY_AGG(titulo_menu) FROM itens_menu) AS titulos,
+			(SELECT ARRAY_AGG(rota_menu) FROM itens_menu) AS rotas,
+			(SELECT ARRAY_AGG(icone_menu) FROM itens_menu) AS icones,
 			(SELECT foto FROM temp_pessoa) AS foto,
 			(SELECT coalesce(dizimista, FALSE) FROM temp_pessoa) AS dizimista
 			FROM paroquias p

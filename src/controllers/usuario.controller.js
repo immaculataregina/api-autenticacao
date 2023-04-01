@@ -50,7 +50,24 @@ exports.autenticar = async (req, res) => {
             // Signed in 
             const user = userCredential.user;
             // Dados de retorno do usuário logado
-            const configuracoes = await UsuarioModel.buscarDadosLogin(schema, user.uid)
+            let configuracoes = await UsuarioModel.buscarDadosLogin(schema, user.uid);
+
+            const itens_menu = configuracoes.titulos.map((titulo, index) => ({
+                titulo,
+                rota: configuracoes.rotas[index],
+                icone: configuracoes.icones[index]
+              }));
+
+            configuracoes = {
+                ...configuracoes,
+                itens_menu
+            }
+
+            //Remove os itens desnecessários
+            delete configuracoes.titulos;
+            delete configuracoes.rotas;
+            delete configuracoes.icones;
+
             res.status(200).json({ result: true, auth: user, configuracoes })
         })
         .catch((error) => {
